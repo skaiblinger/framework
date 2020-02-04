@@ -62,7 +62,8 @@ trait CompilesComponents
         return implode(PHP_EOL, [
             '<?php if (isset($component)) { $__componentOriginal'.$hash.' = $component; } ?>',
             '<?php $component = app()->make('.Str::finish($component, '::class').', '.($data ?: '[]').'); ?>',
-            '<?php $__env->startComponent($component->view(), $component->data()); ?>',
+            '<?php if ($component->shouldRender()): ?>',
+            '<?php $__env->startComponent($component->viewFile(), $component->data()); ?>',
         ]);
     }
 
@@ -73,16 +74,6 @@ trait CompilesComponents
      */
     protected function compileEndComponent()
     {
-        return static::compileClassComponentClosing();
-    }
-
-    /**
-     * Compile the end-component statements into valid PHP.
-     *
-     * @return string
-     */
-    public function compileClassComponentClosing()
-    {
         $hash = array_pop(static::$componentHashStack);
 
         return implode(PHP_EOL, [
@@ -91,6 +82,18 @@ trait CompilesComponents
             '<?php unset($__componentOriginal'.$hash.'); ?>',
             '<?php endif; ?>',
             '<?php echo $__env->renderComponent(); ?>',
+        ]);
+    }
+
+    /**
+     * Compile the end-component statements into valid PHP.
+     *
+     * @return string
+     */
+    public function compileEndComponentClass()
+    {
+        return static::compileEndComponent().PHP_EOL.implode(PHP_EOL, [
+            '<?php endif; ?>',
         ]);
     }
 

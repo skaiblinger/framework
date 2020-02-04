@@ -3,14 +3,14 @@
 namespace Illuminate\View;
 
 use Closure;
-use Illuminate\Contracts\Support\Renderable;
+use Illuminate\Container\Container;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
 
-abstract class Component implements Renderable
+abstract class Component
 {
     /**
      * That properties / methods that should not be exposed to the component.
@@ -27,11 +27,45 @@ abstract class Component implements Renderable
     public $attributes;
 
     /**
-     * Get the view that represents the component.
+     * Get the view / view contents that represent the component.
      *
      * @return string
      */
     abstract public function view();
+
+    /**
+     * Get the Blade view file that should be used when rendering the component.
+     *
+     * @return string
+     */
+    public function viewFile()
+    {
+        $factory = Container::getInstance()->make('view');
+
+        return $factory->exists($this->view())
+                    ? $this->view()
+                    : $this->createBladeViewFromString($factory, $this->view());
+    }
+
+    /**
+     * Create a Blade view with the raw component string content.
+     *
+     * @param  string  $contents
+     * @return string
+     */
+    protected function createBladeViewFromString($factory, $contents)
+    {
+        $factory->addNamespace(
+            '__components',
+            $directory = Container::getInstance()['config']->get('view.compiled')
+        );
+
+        if (! file_exists($viewFile = $directory.'/'.sha1($contents).'.blade.php')) {
+            file_put_contents($viewFile, $contents);
+        }
+
+        return '__components::'.basename($viewFile, '.blade.php');
+    }
 
     /**
      * Get the data that should be supplied to the view.
@@ -63,7 +97,7 @@ abstract class Component implements Renderable
                 return [$method->getName() => $this->createVariableFromMethod($method)];
             });
 
-        return $publicProperties->merge($publicMethods)->toArray();
+        return $publicProperties->merge($publicMethods)->all();
     }
 
     /**
@@ -77,21 +111,6 @@ abstract class Component implements Renderable
         return $method->getNumberOfParameters() === 0
                         ? $this->{$method->getName()}()
                         : Closure::fromCallable([$this, $method->getName()]);
-    }
-
-    /**
-     * Set the extra attributes that the component should make available.
-     *
-     * @param  array  $attributes
-     * @return $this
-     */
-    public function withAttributes(array $attributes)
-    {
-        $this->attributes = $this->attributes ?: new ComponentAttributeBag;
-
-        $this->attributes->setAttributes($attributes);
-
-        return $this;
     }
 
     /**
@@ -118,7 +137,34 @@ abstract class Component implements Renderable
             'data',
             'withAttributes',
             'render',
+            'viewFile',
+            'shouldRender',
         ], $this->except);
+    }
+
+    /**
+     * Set the extra attributes that the component should make available.
+     *
+     * @param  array  $attributes
+     * @return $this
+     */
+    public function withAttributes(array $attributes)
+    {
+        $this->attributes = $this->attributes ?: new ComponentAttributeBag;
+
+        $this->attributes->setAttributes($attributes);
+
+        return $this;
+    }
+
+    /**
+     * Determine if the component should be rendered.
+     *
+     * @return bool
+     */
+    public function shouldRender()
+    {
+        return true;
     }
 
     /**
@@ -128,6 +174,6 @@ abstract class Component implements Renderable
      */
     public function render()
     {
-        return (string) View::make($this->view(), $this->data());
+        return (string) View::make($this->viewFile(), $this->data());
     }
 }

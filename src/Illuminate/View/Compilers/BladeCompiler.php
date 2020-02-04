@@ -171,7 +171,7 @@ class BladeCompiler extends Compiler implements CompilerInterface
     protected function getOpenAndClosingPhpTokens($contents)
     {
         return collect(token_get_all($contents))
-            ->pluck($tokenNumber = 0)
+            ->pluck(0)
             ->filter(function ($token) {
                 return in_array($token, [T_OPEN_TAG, T_OPEN_TAG_WITH_ECHO, T_CLOSE_TAG]);
             });
@@ -519,11 +519,22 @@ class BladeCompiler extends Compiler implements CompilerInterface
      *
      * @param  string  $class
      * @param  string|null  $alias
+     * @param  string  $prefix
      * @return void
      */
-    public function component($class, $alias = null)
+    public function component($class, $alias = null, $prefix = '')
     {
-        $alias = $alias ?: Str::kebab(class_basename($class));
+        if (is_null($alias)) {
+            $alias = Str::contains($class, '\\View\\Components\\')
+                            ? collect(explode('\\', Str::after($class, '\\View\\Components\\')))->map(function ($segment) {
+                                return Str::kebab($segment);
+                            })->implode(':')
+                            : Str::kebab(class_basename($class));
+        }
+
+        if (! empty($prefix)) {
+            $alias = $prefix.'-'.$alias;
+        }
 
         $this->classComponentAliases[$alias] = $class;
     }
@@ -532,17 +543,28 @@ class BladeCompiler extends Compiler implements CompilerInterface
      * Register an array of class-based components.
      *
      * @param  array  $components
+     * @param  string  $prefix
      * @return void
      */
-    public function components(array $components)
+    public function components(array $components, $prefix = '')
     {
         foreach ($components as $key => $value) {
             if (is_numeric($key)) {
-                static::component($value);
+                static::component($value, null, $prefix);
             } else {
-                static::component($key, $value);
+                static::component($key, $value, $prefix);
             }
         }
+    }
+
+    /**
+     * Get the registered class component aliases.
+     *
+     * @return array
+     */
+    public function getClassComponentAliases()
+    {
+        return $this->classComponentAliases;
     }
 
     /**

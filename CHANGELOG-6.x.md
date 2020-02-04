@@ -1,6 +1,67 @@
 # Release Notes for 6.x
 
-## [Unreleased](https://github.com/laravel/framework/compare/v6.11.0...6.x)
+## [Unreleased](https://github.com/laravel/framework/compare/v6.13.1...6.x)
+
+### Added
+- Added `Illuminate\Bus\Dispatcher::dispatchAfterResponse()` method ([#31300](https://github.com/laravel/framework/pull/31300), [8a3cdb0](https://github.com/laravel/framework/commit/8a3cdb0622047b1d94b4a754bfe98fb7dc1c174a))
+
+### Fixed
+- Used current DB to create Doctrine Connections ([#31278](https://github.com/laravel/framework/pull/31278))
+
+### TODO
+- Use SKIP LOCKED for mysql 8.1 and pgsql 9.5 queue workers ([#31287](https://github.com/laravel/framework/pull/31287))
+- Dont merge middleware from method and property ([#31301](https://github.com/laravel/framework/pull/31301))
+- Fix plucking column name containing a space ([#31299](https://github.com/laravel/framework/pull/31299))
+- Split specifyParameter() to external trait ([#31254](https://github.com/laravel/framework/pull/31254))
+- Fix bug with wildcard caching in event dispatcher ([#31313](https://github.com/laravel/framework/pull/31313))
+
+
+## [v6.13.1 (2020-01-28)](https://github.com/laravel/framework/compare/v6.13.0...v6.13.1)
+
+### Fixed
+- Fixed error on `queue:work` database on Windows ([#31277](https://github.com/laravel/framework/pull/31277))
+
+
+## [v6.13.0 (2020-01-28)](https://github.com/laravel/framework/compare/v6.12.0...v6.13.0)
+
+### Added
+- Added `--api` option to the `make:model` command ([#31197](https://github.com/laravel/framework/pull/31197), [#31222](https://github.com/laravel/framework/pull/31222))
+- Added `PendingResourceRegistration::shallow()` method ([#31208](https://github.com/laravel/framework/pull/31208), [104c539](https://github.com/laravel/framework/commit/104c539c342d395e2f3c4ba7339df095f83f6352))
+- Allowed formatting an implicit attribute using a closure ([#31246](https://github.com/laravel/framework/pull/31246))
+- Added `Filesystem::ensureDirectoryExists()` method ([8a8eed4](https://github.com/laravel/framework/commit/8a8eed4d157102ef77527891ac1d8f8e85e7afee))
+- Added support to `Storage::url()` for the Ftp driver ([#31258](https://github.com/laravel/framework/pull/31258), [b8790e5](https://github.com/laravel/framework/commit/b8790e56bb7333943db799e6ff6e21a7b01218e0))
+
+### Fixed
+- Fixed laravel migrations when migrating to sql server (dropColumn with default value) ([#31229](https://github.com/laravel/framework/pull/31229))
+- Fixed `handleBeginTransactionException()` method calling pdo property instead of getPdo() method ([#31233](https://github.com/laravel/framework/pull/31233))
+- Fixed channel names when broadcasting via redis ([#31261](https://github.com/laravel/framework/pull/31261))
+- Replace asterisks before validation ([#31257](https://github.com/laravel/framework/pull/31257))
+
+### Changed
+- Reset timeout handler after worker loop ([#31198](https://github.com/laravel/framework/pull/31198))
+
+
+## [v6.12.0 (2020-01-21)](https://github.com/laravel/framework/compare/v6.11.0...v6.12.0)
+
+### Added
+- Added `ServiceProvider::loadFactoriesFrom()` method ([#31133](https://github.com/laravel/framework/pull/31133))
+- Added `TestResponse::dumpSession()` method ([#31131](https://github.com/laravel/framework/pull/31131))
+- Added `Str::isUuid()` method ([#31148](https://github.com/laravel/framework/pull/31148))
+- Restored phpunit 7 support ([#31113](https://github.com/laravel/framework/pull/31113))
+- Added `Request::boolean()` method ([#31160](https://github.com/laravel/framework/pull/31160))
+- Added `Database\Eloquent\FactoryBuilder::createMany()` ([#31171](https://github.com/laravel/framework/pull/31171), [6553d59](https://github.com/laravel/framework/commit/6553d5923959bd947b49eb089053cd430d8968d4))
+- Added missing options for PhpRedis ([#31182](https://github.com/laravel/framework/pull/31182))
+
+### Fixed
+- Fixed `Cache\RedisLock::acquire()` ([#31168](https://github.com/laravel/framework/pull/31168), [8683a3d](https://github.com/laravel/framework/commit/8683a3d721f92e512a83a3e5feb3d0a9bb682560))
+- Fixed database url parsing for connections with no database specified ([#31185](https://github.com/laravel/framework/pull/31185))
+- Prevent ambiguous column with table name prefix ([#31174](https://github.com/laravel/framework/pull/31174))
+
+### Optimization
+- Fixed memory usage on downloading large files ([#31163](https://github.com/laravel/framework/pull/31163))
+
+### Changed
+- Replace Event Dispatcher in resolved cache repositories when `Event::fake()` is used ([#31119](https://github.com/laravel/framework/pull/31119), [0a70beb](https://github.com/laravel/framework/commit/0a70bebd5ecfd51185a312bbfb60ee7f8ff7eb09))
 
 
 ## [v6.11.0 (2020-01-14)](https://github.com/laravel/framework/compare/v6.10.1...v6.11.0)

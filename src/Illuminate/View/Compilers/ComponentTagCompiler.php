@@ -136,7 +136,7 @@ class ComponentTagCompiler
         return preg_replace_callback($pattern, function (array $matches) {
             $attributes = $this->getAttributesFromAttributeString($matches['attributes']);
 
-            return $this->componentString($matches[1], $attributes)."\n@endcomponent";
+            return $this->componentString($matches[1], $attributes)."\n@endcomponentClass";
         }, $value);
     }
 
@@ -188,7 +188,11 @@ class ComponentTagCompiler
                     ->make(Application::class)
                     ->getNamespace();
 
-        return $namespace.'ViewComponents\\'.ucfirst(Str::camel($component));
+        $componentPieces = array_map(function ($componentPiece) {
+            return ucfirst(Str::camel($componentPiece));
+        }, explode(':', $component));
+
+        return $namespace.'View\\Components\\'.implode('\\', $componentPieces);
     }
 
     /**
@@ -219,7 +223,7 @@ class ComponentTagCompiler
      */
     protected function compileClosingTags(string $value)
     {
-        return preg_replace("/<\/\s*x-[\w\-]*\s*>/", '@endcomponent', $value);
+        return preg_replace("/<\/\s*x-[\w\-]*\s*>/", '@endcomponentClass', $value);
     }
 
     /**
